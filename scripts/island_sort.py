@@ -11,10 +11,10 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-ISLAND_COUNT = 12       # number of island blobs to place
-MIN_RADIUS = 40         # smallest island radius in pixels
-MAX_RADIUS = 120        # largest island radius in pixels
-COAST_NOISE = 0.4       # coastline roughness (0 = smooth circles, 1 = very ragged)
+ISLAND_COUNT = 8       # number of island blobs to place
+MIN_RADIUS = 10         # smallest island radius in pixels
+MAX_RADIUS = 60        # largest island radius in pixels
+COAST_NOISE = 0.8       # coastline roughness (0 = smooth circles, 1 = very ragged)
 AXIS = 0                # 0 = horizontal rows, 1 = vertical columns, 2 = both blended
 SEED = 42               # set None for non-reproducible
 
