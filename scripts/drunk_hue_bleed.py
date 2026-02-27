@@ -64,12 +64,9 @@ for row in range(h):
     sorted_pixels = row_pixels[order]
     sorted_hues = row_hues[order]
 
-    # Find sorted pixel whose hue is closest to the boundary pixel's hue
-    target_hue = hue_map[row, n]
-    diffs = np.minimum(
-        np.abs(sorted_hues - target_hue),
-        360.0 - np.abs(sorted_hues - target_hue),
-    )
+    # Find sorted pixel visually closest to boundary pixel (RGB distance)
+    target_rgb = pixels[row, n].astype(float)
+    diffs = np.sqrt(((sorted_pixels.astype(float) - target_rgb) ** 2).sum(axis=1))
     best_idx = int(np.argmin(diffs))
 
     # Rotate so best match lands at position n-1 (the boundary)
