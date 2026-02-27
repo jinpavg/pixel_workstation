@@ -127,6 +127,11 @@ heightmap += np.array(blurred_noise).astype(float) / 255.0 * COAST_NOISE
 
 sea_mask = heightmap <= 0.5  # True = sea (participates in sorting)
 
+# --- SAVE MASK PREVIEW ---
+# White = island (preserved), black = sea (sorted)
+mask_preview = np.where(sea_mask, 0, 255).astype(np.uint8)
+save_image(np.stack([mask_preview] * 3, axis=-1), name="island_mask")
+
 # --- PROCESS ---
 hue_map = hue(pixels)
 
