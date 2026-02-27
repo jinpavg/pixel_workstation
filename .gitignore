@@ -11,11 +11,9 @@ venv/
 .venv/
 env/
 
-# Images (track .gitkeep but not actual images)
-input/*
-!input/.gitkeep
-output/*
-!output/.gitkeep
+# Images -- tracked so we can round-trip between phone and Claude Code
+# input/   <- push source images here
+# output/  <- processed results appear here
 
 # OS
 .DS_Store
