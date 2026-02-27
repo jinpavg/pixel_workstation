@@ -19,8 +19,8 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-STEP_SIZE = 25       # max drunk-walk step per row (controls boundary smoothness)
-RIGHT_LIMIT = 0.75   # rightmost n as fraction of width (0.5 = midpoint, 1.0 = edge)
+STEP_SIZE = 15       # max drunk-walk step per row (controls boundary smoothness)
+RIGHT_LIMIT = 0.6   # rightmost n as fraction of width (0.5 = midpoint, 1.0 = edge)
 SEED = 42            # set None for non-reproducible
 
 # --- LOAD ---
