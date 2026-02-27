@@ -19,7 +19,8 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-STEP_SIZE = 50       # max drunk-walk step per row (controls boundary smoothness)
+STEP_SIZE = 25       # max drunk-walk step per row (controls boundary smoothness)
+RIGHT_LIMIT = 0.75   # rightmost n as fraction of width (0.5 = midpoint, 1.0 = edge)
 SEED = 42            # set None for non-reproducible
 
 # --- LOAD ---
@@ -42,14 +43,15 @@ hue_map = hue(pixels)  # (H, W) float, 0-360
 
 result = pixels.copy()
 mid = w // 2
+right = int(w * RIGHT_LIMIT)
 
 # Initialize drunk walk starting point
-n = rng.integers(mid, w)
+n = rng.integers(mid, right + 1)
 
 for row in range(h):
     # Drunk walk: nudge boundary
     step = rng.integers(-STEP_SIZE, STEP_SIZE + 1)
-    n = int(np.clip(n + step, mid, w - 1))
+    n = int(np.clip(n + step, mid, right))
 
     if n < 2:
         continue
