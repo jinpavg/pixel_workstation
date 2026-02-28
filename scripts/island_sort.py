@@ -17,7 +17,8 @@ MAX_RADIUS = 190        # largest island radius in pixels
 COAST_NOISE = 1.0       # coastline roughness (0 = smooth circles, 1 = very ragged)
 AXIS = 0                # 0 = horizontal rows, 1 = vertical columns
 MASK_ONLY = False       # True = only output the mask preview, skip sorting
-SEEDS = [42, 43]        # run for each seed
+SEEDS = [43]            # run for each seed
+ISLAND_COUNTS = [9, 8]  # run for each count
 
 
 def bleed_rotate(sorted_seg, left_nbr, right_nbr):
@@ -111,11 +112,13 @@ h, w, _ = pixels.shape
 yy, xx = np.mgrid[0:h, 0:w]
 
 for seed in SEEDS:
+  for n_islands in ISLAND_COUNTS:
+    tag = f"n{n_islands}_s{seed}"
     # --- GENERATE ISLAND MASK ---
     rng = np.random.default_rng(seed)
     heightmap = np.zeros((h, w), dtype=float)
 
-    for _ in range(ISLAND_COUNT):
+    for _ in range(n_islands):
         cy, cx = rng.integers(0, h), rng.integers(0, w)
         radius = rng.integers(MIN_RADIUS, MAX_RADIUS + 1)
         sigma = radius / 2.5
@@ -132,7 +135,7 @@ for seed in SEEDS:
 
     # --- SAVE MASK PREVIEW ---
     mask_preview = np.where(sea_mask, 0, 255).astype(np.uint8)
-    save_image(np.stack([mask_preview] * 3, axis=-1), name=f"island_mask_s{seed}")
+    save_image(np.stack([mask_preview] * 3, axis=-1), name=f"island_mask_{tag}")
 
     # --- PROCESS ---
     if not MASK_ONLY:
@@ -149,4 +152,4 @@ for seed in SEEDS:
                 result = sort_pass(pixels, hue_map, sea_mask)
 
             result[~sea_mask] = pixels[~sea_mask]
-            save_image(result, name=f"island_sort_{axis_names[ax]}_s{seed}")
+            save_image(result, name=f"island_sort_{axis_names[ax]}_{tag}")
