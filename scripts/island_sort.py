@@ -11,9 +11,9 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-ISLAND_COUNT = 12       # number of island blobs to place
+ISLAND_COUNT = 10       # number of island blobs to place
 MIN_RADIUS = 20         # smallest island radius in pixels
-MAX_RADIUS = 200        # largest island radius in pixels
+MAX_RADIUS = 190        # largest island radius in pixels
 COAST_NOISE = 1.0       # coastline roughness (0 = smooth circles, 1 = very ragged)
 AXIS = 0                # 0 = horizontal rows, 1 = vertical columns
 MASK_ONLY = False       # True = only output the mask preview, skip sorting
