@@ -16,7 +16,7 @@ MIN_RADIUS = 20         # smallest island radius in pixels
 MAX_RADIUS = 200        # largest island radius in pixels
 COAST_NOISE = 1.0       # coastline roughness (0 = smooth circles, 1 = very ragged)
 AXIS = 0                # 0 = horizontal rows, 1 = vertical columns
-MASK_ONLY = True        # True = only output the mask preview, skip sorting
+MASK_ONLY = False       # True = only output the mask preview, skip sorting
 SEED = 43               # set None for non-reproducible
 
 
@@ -138,16 +138,14 @@ if not MASK_ONLY:
     hue_map = hue(pixels)
     axis_names = {0: "rows", 1: "cols"}
 
-    if AXIS == 1:
-        v_pixels = np.transpose(pixels, (1, 0, 2))
-        v_hue = hue_map.T
-        v_mask = sea_mask.T
-        result = np.transpose(sort_pass(v_pixels, v_hue, v_mask), (1, 0, 2))
-    else:
-        result = sort_pass(pixels, hue_map, sea_mask)
+    for ax in (0, 1):
+        if ax == 1:
+            v_pixels = np.transpose(pixels, (1, 0, 2))
+            v_hue = hue_map.T
+            v_mask = sea_mask.T
+            result = np.transpose(sort_pass(v_pixels, v_hue, v_mask), (1, 0, 2))
+        else:
+            result = sort_pass(pixels, hue_map, sea_mask)
 
-    # Restore island pixels (ensure untouched)
-    result[~sea_mask] = pixels[~sea_mask]
-
-    # --- SAVE ---
-    save_image(result, name=f"island_sort_{axis_names[AXIS]}")
+        result[~sea_mask] = pixels[~sea_mask]
+        save_image(result, name=f"island_sort_{axis_names[ax]}")
