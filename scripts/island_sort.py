@@ -11,11 +11,12 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-ISLAND_COUNT = 10       # number of island blobs to place
-MIN_RADIUS = 10         # smallest island radius in pixels
-MAX_RADIUS = 150        # largest island radius in pixels
-COAST_NOISE = 0.9       # coastline roughness (0 = smooth circles, 1 = very ragged)
-AXIS = 0                # 0 = horizontal rows, 1 = vertical columns, 2 = both blended
+ISLAND_COUNT = 12       # number of island blobs to place
+MIN_RADIUS = 20         # smallest island radius in pixels
+MAX_RADIUS = 200        # largest island radius in pixels
+COAST_NOISE = 1.0       # coastline roughness (0 = smooth circles, 1 = very ragged)
+AXIS = 0                # 0 = horizontal rows, 1 = vertical columns
+MASK_ONLY = True        # True = only output the mask preview, skip sorting
 SEED = 43               # set None for non-reproducible
 
 
@@ -133,18 +134,11 @@ mask_preview = np.where(sea_mask, 0, 255).astype(np.uint8)
 save_image(np.stack([mask_preview] * 3, axis=-1), name="island_mask")
 
 # --- PROCESS ---
-hue_map = hue(pixels)
-axis_names = {0: "rows", 1: "cols", 2: "both"}
+if not MASK_ONLY:
+    hue_map = hue(pixels)
+    axis_names = {0: "rows", 1: "cols"}
 
-for ax in (0, 1, 2):
-    if ax == 2:
-        h_result = sort_pass(pixels, hue_map, sea_mask)
-        v_pixels = np.transpose(pixels, (1, 0, 2))
-        v_hue = hue_map.T
-        v_mask = sea_mask.T
-        v_result = np.transpose(sort_pass(v_pixels, v_hue, v_mask), (1, 0, 2))
-        result = ((h_result.astype(np.uint16) + v_result.astype(np.uint16)) // 2).astype(np.uint8)
-    elif ax == 1:
+    if AXIS == 1:
         v_pixels = np.transpose(pixels, (1, 0, 2))
         v_hue = hue_map.T
         v_mask = sea_mask.T
@@ -156,4 +150,4 @@ for ax in (0, 1, 2):
     result[~sea_mask] = pixels[~sea_mask]
 
     # --- SAVE ---
-    save_image(result, name=f"island_sort_{axis_names[ax]}")
+    save_image(result, name=f"island_sort_{axis_names[AXIS]}")
