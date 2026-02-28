@@ -11,7 +11,7 @@ from core import load_image, save_image, hue
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
 STEP_SIZE = 15       # max drunk-walk step per row
-MIN_GAP = 0.2        # minimum untouched middle width as fraction of image dimension
+MIN_GAP = 0.1        # minimum untouched middle width as fraction of image dimension
 LEFT_LIMIT = 0.4     # how far inward the left boundary can reach (fraction of width)
 RIGHT_LIMIT = 0.6    # how far inward the right boundary can reach (from left edge)
 SEED = 43
