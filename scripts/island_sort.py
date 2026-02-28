@@ -11,13 +11,13 @@ from core import load_image, save_image, hue
 
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
-ISLAND_COUNT = 10       # number of island blobs to place
+ISLAND_COUNT = 9        # number of island blobs to place
 MIN_RADIUS = 20         # smallest island radius in pixels
 MAX_RADIUS = 190        # largest island radius in pixels
 COAST_NOISE = 1.0       # coastline roughness (0 = smooth circles, 1 = very ragged)
 AXIS = 0                # 0 = horizontal rows, 1 = vertical columns
 MASK_ONLY = False       # True = only output the mask preview, skip sorting
-SEED = 43               # set None for non-reproducible
+SEEDS = [42, 43]        # run for each seed
 
 
 def bleed_rotate(sorted_seg, left_nbr, right_nbr):
@@ -108,44 +108,45 @@ if INPUT is None:
 pixels = load_image(INPUT)
 h, w, _ = pixels.shape
 
-# --- GENERATE ISLAND MASK ---
-rng = np.random.default_rng(SEED)
-heightmap = np.zeros((h, w), dtype=float)
 yy, xx = np.mgrid[0:h, 0:w]
 
-for _ in range(ISLAND_COUNT):
-    cy, cx = rng.integers(0, h), rng.integers(0, w)
-    radius = rng.integers(MIN_RADIUS, MAX_RADIUS + 1)
-    sigma = radius / 2.5
-    dist_sq = (yy - cy) ** 2 + (xx - cx) ** 2
-    heightmap += np.exp(-dist_sq / (2 * sigma ** 2))
+for seed in SEEDS:
+    # --- GENERATE ISLAND MASK ---
+    rng = np.random.default_rng(seed)
+    heightmap = np.zeros((h, w), dtype=float)
 
-# Add blurred noise for organic coastlines
-coast_noise = rng.random((h, w)).astype(np.float32)
-noise_img = Image.fromarray((coast_noise * 255).astype(np.uint8), mode="L")
-blurred_noise = noise_img.filter(ImageFilter.GaussianBlur(radius=15))
-heightmap += np.array(blurred_noise).astype(float) / 255.0 * COAST_NOISE
+    for _ in range(ISLAND_COUNT):
+        cy, cx = rng.integers(0, h), rng.integers(0, w)
+        radius = rng.integers(MIN_RADIUS, MAX_RADIUS + 1)
+        sigma = radius / 2.5
+        dist_sq = (yy - cy) ** 2 + (xx - cx) ** 2
+        heightmap += np.exp(-dist_sq / (2 * sigma ** 2))
 
-sea_mask = heightmap <= 0.5  # True = sea (participates in sorting)
+    # Add blurred noise for organic coastlines
+    coast_noise = rng.random((h, w)).astype(np.float32)
+    noise_img = Image.fromarray((coast_noise * 255).astype(np.uint8), mode="L")
+    blurred_noise = noise_img.filter(ImageFilter.GaussianBlur(radius=15))
+    heightmap += np.array(blurred_noise).astype(float) / 255.0 * COAST_NOISE
 
-# --- SAVE MASK PREVIEW ---
-# White = island (preserved), black = sea (sorted)
-mask_preview = np.where(sea_mask, 0, 255).astype(np.uint8)
-save_image(np.stack([mask_preview] * 3, axis=-1), name="island_mask")
+    sea_mask = heightmap <= 0.5  # True = sea (participates in sorting)
 
-# --- PROCESS ---
-if not MASK_ONLY:
-    hue_map = hue(pixels)
-    axis_names = {0: "rows", 1: "cols"}
+    # --- SAVE MASK PREVIEW ---
+    mask_preview = np.where(sea_mask, 0, 255).astype(np.uint8)
+    save_image(np.stack([mask_preview] * 3, axis=-1), name=f"island_mask_s{seed}")
 
-    for ax in (0, 1):
-        if ax == 1:
-            v_pixels = np.transpose(pixels, (1, 0, 2))
-            v_hue = hue_map.T
-            v_mask = sea_mask.T
-            result = np.transpose(sort_pass(v_pixels, v_hue, v_mask), (1, 0, 2))
-        else:
-            result = sort_pass(pixels, hue_map, sea_mask)
+    # --- PROCESS ---
+    if not MASK_ONLY:
+        hue_map = hue(pixels)
+        axis_names = {0: "rows", 1: "cols"}
 
-        result[~sea_mask] = pixels[~sea_mask]
-        save_image(result, name=f"island_sort_{axis_names[ax]}")
+        for ax in (0, 1):
+            if ax == 1:
+                v_pixels = np.transpose(pixels, (1, 0, 2))
+                v_hue = hue_map.T
+                v_mask = sea_mask.T
+                result = np.transpose(sort_pass(v_pixels, v_hue, v_mask), (1, 0, 2))
+            else:
+                result = sort_pass(pixels, hue_map, sea_mask)
+
+            result[~sea_mask] = pixels[~sea_mask]
+            save_image(result, name=f"island_sort_{axis_names[ax]}_s{seed}")
