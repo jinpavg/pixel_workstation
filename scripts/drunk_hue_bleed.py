@@ -20,8 +20,8 @@ from core import load_image, save_image, hue
 # --- CONFIG ---
 INPUT = sys.argv[1] if len(sys.argv) > 1 else None
 STEP_SIZE = 15       # max drunk-walk step per row (controls boundary smoothness)
-RIGHT_LIMIT = 0.6   # rightmost n as fraction of width (0.5 = midpoint, 1.0 = edge)
-SEED = 42            # set None for non-reproducible
+RIGHT_LIMIT = 0.35    # rightmost n as fraction of width (0.5 = midpoint, 1.0 = edge)
+SEED = 39            # set None for non-reproducible
 
 # --- LOAD ---
 if INPUT is None:
@@ -42,8 +42,8 @@ rng = np.random.default_rng(SEED)
 hue_map = hue(pixels)  # (H, W) float, 0-360
 
 result = pixels.copy()
-mid = w // 2
-right = int(w * RIGHT_LIMIT)
+right = max(1, int(w * RIGHT_LIMIT))
+mid = max(1, right // 2)
 
 # Initialize drunk walk starting point
 n = rng.integers(mid, right + 1)
